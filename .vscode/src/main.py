@@ -38,15 +38,17 @@ with open('data.csv', 'w') as file:
 #function for parsing data
 def parseGraphData(toParse):
     info = str(toParse).split(",")
+    pressureVal = info[0].split(":")[1]
     index = info[1].split(":")[1].find("\\r")
-    garbageVal = (info[1].split(":")[1])[:index]
-    return float(garbageVal)
+    forceVal = (info[1].split(":")[1])[:index]
+    return float(pressureVal), float(forceVal)
 
 
 
 
 
 #some final initialization
+plt.show()
 command = input("Enter command LAUNCH: ")
 dataPort.write(command.encode('utf-8'))
 startTime = datetime.datetime.now()
@@ -60,7 +62,7 @@ def animation(i):
     if dataPort.in_waiting == 0:
         pass
     data = dataPort.readline()     
-    pressure = parseGraphData(data)
+    pressure, force = parseGraphData(data)
     graphData.append(pressure) #the data we want from mcu
     currTime=(datetime.datetime.now() - startTime).total_seconds()
     graphTime.append(currTime)
