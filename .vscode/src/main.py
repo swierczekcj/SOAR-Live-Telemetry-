@@ -2,6 +2,7 @@ import serial.tools.list_ports
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
+import csv
 
 from matplotlib.animation import FuncAnimation
 from scipy.interpolate import make_interp_spline
@@ -27,6 +28,11 @@ for i in range(len(portsList)):
 
 dataPort = serial.Serial(want, 115200) #initializing and opening the serial port
 
+#setting up our CSV for storage
+f = ["Pressure", "Force", "Time"]
+with open('data.csv', 'w') as file:
+    writer = csv.DictWriter(file, fieldnames=f)
+    writer.writeheader()
 
 
 #function for parsing data
@@ -54,23 +60,25 @@ def animation(i):
     if dataPort.in_waiting == 0:
         pass
     data = dataPort.readline()     
-    print(data) #for debug
-    garbage = parseGraphData(data)
-    graphData.append(garbage) #the data we want from mcu
+    pressure = parseGraphData(data)
+    graphData.append(pressure) #the data we want from mcu
     currTime=(datetime.datetime.now() - startTime).total_seconds()
-    #print(currTime) #for debug
     graphTime.append(currTime)
     
-    #xySpline = make_interp_spline(graphTime, graphData)
-    
-    #x = np.linspace(graphTime.min(), graphTime.max(), 500)
-    #y = xySpline(x)
+    with open('data.csv', 'a') as file:
+        writer = csv.DictWriter(file, fieldnames=f)
+        info = {
+            f[0]:pressure,
+            f[1]:0,
+            f[2]:currTime
+        }
+        writer.writerow(info)
     
     plt.cla()
     plt.plot(graphTime, graphData)
-    plt.title("Garbage over time")
-    plt.xlabel("time")
-    plt.ylabel("garbo")
+    plt.title("Pressure over time")
+    plt.xlabel("Time")
+    plt.ylabel("Pressure")
     plt.tight_layout()
 
     #check if we have reached the end of the timer
