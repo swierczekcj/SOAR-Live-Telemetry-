@@ -9,7 +9,8 @@ from scipy.interpolate import make_interp_spline
 
 #globals
 portsList = []
-graphData = []
+pressureData = []
+forceData = []
 graphTime = []
 
 
@@ -48,7 +49,7 @@ def parseGraphData(toParse):
 
 
 #some final initialization
-plt.show()
+fig, (ax1, ax2) = plt.subplots(2,1)
 command = input("Enter command LAUNCH: ")
 dataPort.write(command.encode('utf-8'))
 startTime = datetime.datetime.now()
@@ -63,24 +64,30 @@ def animation(i):
         pass
     data = dataPort.readline()     
     pressure, force = parseGraphData(data)
-    graphData.append(pressure) #the data we want from mcu
-    currTime=(datetime.datetime.now() - startTime).total_seconds()
+    pressureData.append(pressure) #the data we want from mcu
+    forceData.append(force)
+    currTime=(datetime.datetime.now() - startTime).total_seconds() -1 #idk why this -1 is needed but it is
     graphTime.append(currTime)
     
+    #store it
     with open('data.csv', 'a') as file:
         writer = csv.DictWriter(file, fieldnames=f)
         info = {
             f[0]:pressure,
-            f[1]:0,
+            f[1]:force,
             f[2]:currTime
         }
         writer.writerow(info)
     
-    plt.cla()
-    plt.plot(graphTime, graphData)
-    plt.title("Pressure over time")
-    plt.xlabel("Time")
-    plt.ylabel("Pressure")
+    #graph it
+    ax1.cla()
+    ax2.cla()
+    ax1.set_title("Pressure and Force over time")
+    ax1.set_ylabel("Pressure (kPa)")
+    ax2.set_ylabel("Force (N)")
+    ax2.set_xlabel("Time (s)")
+    ax1.plot(graphTime, pressureData)
+    ax2.plot(graphTime, forceData)
     plt.tight_layout()
 
     #check if we have reached the end of the timer
