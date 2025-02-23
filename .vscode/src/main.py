@@ -29,10 +29,10 @@ for i in range(len(portsList)):
         want = "COM" + str(com)
         print(want)
 
-dataPort = serial.Serial(want, 115200, timeout = 3) #initializing and opening the serial port
+dataPort = serial.Serial(want, 9600, timeout = 3) #initializing and op  ening the serial port
 
-#setting up our CSV for storage
-f = ["Pressure", "Force", "Time"]
+#setting up our CSV for storage 
+f = ["Time", "Force", "Pressure"]
 with open('data.csv', 'w') as file:
     writer = csv.DictWriter(file, fieldnames=f)
     writer.writeheader()
